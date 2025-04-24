@@ -1,3 +1,205 @@
+; Pin Connection
+; D0-7  =   PA0-7	Data BUS	    Put your command or data on this bus
+; RD    =   PA8		Read pin	    Read from touch screen input 
+; WR    =   PA9		Write pin	    Write data/command to display
+; RS    =   PA10	Command pin	    Choose command or data to write
+; CS    =   PA11	Chip Select	    Enable the TFT,(active low)
+; RST   =   PA12	Reset		    Reset the TFT (active low)
+; D0-7  =   PB0-4	5 Keys
+
+		
+    ;TFT
+    IMPORT GPIO_Init
+    IMPORT TFT_WriteCommand
+    IMPORT TFT_WriteData
+    IMPORT TFT_Init
+    IMPORT TFT_FillScreen
+    IMPORT Delay
+    IMPORT font_map
+    IMPORT Read_Keys
+    ;Graphics
+    IMPORT Draw_Pixel
+    IMPORT Draw_Char
+    IMPORT Draw_Msg
+    IMPORT Draw_Line
+    IMPORT Draw_Rectangle	
+    IMPORT Clear_Screen
+    IMPORT Init_Screen
+    
+	EXPORT __main
+		
+    AREA MYDATA, DATA, READWRITE    ; Declare the GameData section
+
+; ---------- COLORS ----------
+
+Red     EQU 0x001F   ; 00000 000000 11111
+Green   EQU 0x07E0   ; 00000 111111 00000
+Blue    EQU 0xF800   ; 11111 000000 00000
+Yellow  EQU 0x06FF   ; 11111 111111 00000
+White   EQU 0xFFFF   ; 11111 111111 11111
+Black   EQU 0x0000   ; 00000 000000 00000
+
+; PADDLE DATA
+
+PADDLE_WIDTH         DCW     10
+PADDLE_HEIGHT        DCW     40
+PADDLE_COLOR         DCW     3
+PADDLE_SPEED         DCW     2
+
+; BALL DATA
+BALL_X               DCW     170
+BALL_Y               DCW     110
+BALL_VELOCITY_X      DCW     2
+Ball_VELOCITY_Y      DCW     2
+BALL_COLOR           DCB     0
+
+; SCORE DATA AND LIVES
+SCORE                DCB     "SCORE: $"
+
+SCORE_COUNT_PLAYER_1 DCW     0
+SCORE_COUNT_PLAYER_2 DCW     0
+
+; STRING DATA
+string1              DCB     "ONE PLAYER MODE => 2.", 13, 10, "$"
+string2              DCB     "CO-OP PING PONG  => 4.", 13, 10, "$"
+string3              DCB     "Exit => Esc.", 13, 10, "$"
+
+; ESCAPE STATUS
+ESCSTATUS            DCB     0
+
+; TWO PLAYER MODE PADDLE DATA
+PADDLE_COLOR1        DCB     8
+PADDLE_COLOR2        DCB     8
+
+PADDLE_X1            DCW     50
+PADDLE_Y1            DCW     100
+
+PADDLE_X2            DCW     270
+PADDLE_Y2            DCW     100
+						
+
+            AREA    MYcode, CODE, READONLY
+		
+__main FUNCTION
+	
+    BL GPIO_Init
+
+    
+Options_page
+    ; Clear the screen colour
+    BL      TFT_FillScreen
+
+    ; Display option strings
+    MOV     R0, #10                ; Row (approximately 10 for the first string)
+    MOV     R1, #32                ; Column (approximately 32 for horizontal centering)
+    LDR     R2, =string1           ; Load address of first string
+    BL      Draw_Msg               ; Print string
+
+    MOV     R0, #12                ; Row (approximately 12 for the second string)
+    MOV     R1, #30                ; Column (approximately 30 for horizontal centering)
+    LDR     R2, =string2           ; Load address of second string
+    BL      Draw_Msg	           ; Print string
+
+    MOV     R0, #14                ; Row (approximately 14 for third string)
+    MOV     R1, #29                ; Column (approximately 29 for horizontal centering)
+    LDR     R2, =string3           ; Load address of third string
+    BL      Draw_Msg	           ; Print string
+
+    ; Wait for key press
+REENTER BL      Read_Keys           ; Call function to detect key press
+	
+	CMP R0,#1
+	BEQ ONE_PLAYER_MODE
+	
+	CMP R0,#2
+	BEQ PING_PONG_MODE
+	
+	CMP R0,#3
+	BEQ EXIT
+	
+	CMP R0,#4
+	BEQ REENTER
+	
+	ENDFUNC
+
+
+
+; R0 = color ,R1 = Y1 ,R2 = Y2 ,R3 = X1 ,R4 = X2
+
+PING_PONG_MODE
+
+	PUSH {R0-R12, LR}
+	
+	;CLEAR THE SCREEN
+	BL Clear_Screen
+	
+	; DRAWS PLAYER 1
+	LDR R5,=PADDLE_COLOR1
+	LDRH R0, [R5]
+	LDR R5,=PADDLE_Y1
+	LDRH R1, [R5]
+	MOV R2, R1
+	LDR R6, =PADDLE_HEIGHT
+	LDRH R5, [R6]
+	ADD R2, R5
+	LDR R5,=PADDLE_X1
+	LDRH R3 ,[R5]
+	MOV R4, R3
+	LDR R6, =PADDLE_WIDTH
+	LDRH R5, [R6]
+	ADD R4, R5
+	BL Draw_Rectangle
+	
+	;DARWS PLAYER 2
+	LDR R5,=PADDLE_COLOR1
+	LDRH R0, [R5]
+	LDR R5,=PADDLE_Y1
+	LDRH R1, [R5]
+	MOV R2, R1
+	LDR R6, =PADDLE_HEIGHT
+	LDRH R5, [R6]
+	ADD R2, R5
+	LDR R5,=PADDLE_X1
+	LDRH R3 ,[R5]
+	MOV R4, R3
+	LDR R6, =PADDLE_WIDTH
+	LDRH R5, [R6]
+	ADD R4, R5
+	BL Draw_Rectangle
+
+
+        ; Draw Square Center at (x=R5, y=R6 ,Color=R1)
+        ; el function f a5r el code 3ashan lw 7abb t3.adlha 
+        ; in another word till IBRAHIM BAKR TEST IT 
+	LDR R0, =BALL_COLOR
+        LDRH R1, [R0]
+        LDR R0, =BALL_Y
+        LDRH R2, [R0]
+        LDR R0, =BALL_X
+        BL Draw_Square
+	
+	POP {R0-R12, PC}
+
+
+
+ 
+;ONE_PLAYER_MODE END
+
+EXIT
+	BX LR
+	
+ONE_PLAYER_MODE
+	BX LR
+
+
+
+	ALIGN
+	END
+        
+        
+        
+        
+        
         AREA |.text|, CODE, READONLY
         EXPORT BALL_CHECK_MOVE
 
@@ -113,3 +315,66 @@ reset_ball
 
 done
         POP {R4-R9, PC}
+
+
+
+; *************************************************************
+; Draw Square Center at (x=R5, y=R6 ,Color=R1)
+; *************************************************************
+Draw_Square
+    PUSH {R0-R12, LR}
+    MOV R8, R1
+
+    SUBS R1, R5, #5
+    ADDS R2, R5, #5
+    SUBS R3, R6, #5
+    ADDS R4, R6, #5
+
+    ; Set Column Address (0-239)
+    MOV R0, #0x2A
+    BL TFT_WriteCommand
+    MOV R0, R1, LSR #8
+    BL TFT_WriteData
+    MOV R0, R1
+    BL TFT_WriteData
+    MOV R0, R2, LSR #8
+    BL TFT_WriteData
+    MOV R0, R2
+    BL TFT_WriteData
+
+    ; Set Page Address (0-319)
+    MOV R0, #0x2B
+    BL TFT_WriteCommand
+    MOV R0, R3, LSR #8
+    BL TFT_WriteData
+    MOV R0, R3
+    BL TFT_WriteData
+    MOV R0, R4, LSR #8      ; High byte of 0x013F (319)
+    BL TFT_WriteData
+    MOV R0, R4
+    BL TFT_WriteData
+
+    ; Memory Write
+    MOV R0, #0x2C
+    BL TFT_WriteCommand
+
+    ; Prepare color bytes
+    MOV R1, R8, LSR #8     ; High byte
+    AND R2, R8, #0xFF      ; Low byte
+
+    ; Fill screen with color (320x240 = 76800 pixels)
+    LDR R3, =100
+DrawSquare_Loop
+    ; Write high byte
+    MOV R0, R1
+    BL TFT_WriteData
+    
+    ; Write low byte
+    MOV R0, R2
+    BL TFT_WriteData
+    
+    SUBS R3, R3, #1
+    BNE DrawSquare_Loop
+
+    POP {R0-R12, LR}
+    BX LR
