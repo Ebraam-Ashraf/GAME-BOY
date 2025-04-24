@@ -1,7 +1,33 @@
 
+
+;                          TFT Coordinate System (240x320)
+;
+;  --------------------------------------------------------------------------------->
+;  |                         							X-axis (right) 320
+;  |                                                        Y1
+;  |                                                   	   |█|
+;  |                              ●                     X1 |█|  X2
+;  |       |█|                                             |█|
+;  |       |█|                                             |█|
+;  |       |█|                                             |█|
+;  |       |█|                                             Y2
+;  |       |█|                                             
+;  |                                                    
+;  |  Player 1 Paddle 				    Player 2 Paddle
+;  |
+;  |
+;  v
+;
+;  Y-axis (down)240
+
+                              
+
+
+
+
 	EXPORT PING_PONG_MODE
 
-AREA MYDATA, DATA, READWRITE    ; Declare the GameData section
+    AREA PING_DATA, DATA, READWRITE
 
 ; ---------- COLORS ----------
 Red     EQU 0x001F   ; 00000 000000 11111
@@ -35,12 +61,19 @@ ESCSTATUS            DCB     0
 PADDLE_COLOR1        DCB     8
 PADDLE_COLOR2        DCB     8
 
-PADDLE_X1            DCW     50
-PADDLE_Y1            DCW     100
+PADDLE_1_X1            DCW     50
+PADDLE_1_X2            DCW     50
+PADDLE_1_Y1            DCW     50
+PADDLE_1_Y2            DCW     50
 
-PADDLE_X2            DCW     270
-PADDLE_Y2            DCW     100
+PADDLE_2_X1            DCW     50
+PADDLE_2_X2            DCW     50
+PADDLE_2_Y1            DCW     50
+PADDLE_2_Y2            DCW     50
 
+
+
+    AREA PING_PONG_MODE, CODE, READONLY
      
 PING_PONG_MODE
 
@@ -96,21 +129,10 @@ PING_PONG_MODE
 	
 	POP {R0-R12, PC}
 
-
-
- 
-;ONE_PLAYER_MODE END
-
-EXIT
-	BX LR
-
-
-
- PING_PONG_MODE
-    LOOP:
+LOOP:
         BL BALL_CHECK_MOVE        ; Move the ball, handle collisions, etc.
 
-        ; Read PB5 status (we can simulate or read GPIO directly)
+        ; Read PB5 status
         LDR R0, =0x40010C08       ; GPIOB_IDR address
         LDR R1, [R0]              ; Read full IDR (32-bit)
         MOV R2, #0x20             ; Mask for bit 5 (PB5)
@@ -120,26 +142,25 @@ EXIT
 
         B LOOP                    ; Else repeat
 
-ONE_PLAYER_MODE
-	BX LR
+
+EXIT
+	BX LR        
 
 
-
-	ALIGN
-	END
-        
-        
-        
-        
-        
-        AREA |.text|, CODE, READONLY
-        EXPORT BALL_CHECK_MOVE
 
 BALL_CHECK_MOVE
         PUSH {R4-R9, LR}
 
         ; === Erase old ball ===
-        BL Draw_Square_Black
+        ; Draw Square Center at (x=R5, y=R6 ,Color=R1)
+        ; el function f a5r el code 3ashan lw 7abb t3.adlha 
+        ; in another word till IBRAHIM BAKR TEST IT 
+	LDR R0, =Black
+        LDRH R1, [R0]
+        LDR R0, =BALL_Y
+        LDRH R2, [R0]
+        LDR R0, =BALL_X
+        BL Draw_Square
 
         ; === Update Ball Position ===
         LDR R0, =X_BALL
@@ -157,79 +178,113 @@ BALL_CHECK_MOVE
         STR R1, [R0]     ; Y_BALL += Y_VELOCITY
 
         ; === Draw updated ball ===
-        BL Draw_Square_White
+        ; Draw Square Center at (x=R5, y=R6 ,Color=R1)
+        ; el function f a5r el code 3ashan lw 7abb t3.adlha 
+        ; in another word till IBRAHIM BAKR TEST IT 
+	LDR R0, =BALL_COLOR
+        LDRH R1, [R0]
+        LDR R0, =BALL_Y
+        LDRH R2, [R0]
+        LDR R0, =BALL_X
+        BL Draw_Square
 
-        ; === Load updated values into R4 (X) and R5 (Y) ===
-        LDR R4, =X_BALL
-        LDR R4, [R4]
-        LDR R5, =Y_BALL
-        LDR R5, [R5]
+         ; === Load BALL X into R4 and BALL Y into R5 ===
+        LDR     R0, =X_BALL
+        LDR     R4, [R0]        ; R4 = X_BALL
+        LDR     R0, =Y_BALL
+        LDR     R5, [R0]        ; R5 = Y_BALL
 
-        ; === Paddle 1 Collision Check ===
-        MOV R9, #0
-        CMP R4, #234
-        ADDLT R9, R9, #1
-        CMP R4, #224
-        ADDGE R9, R9, #1
-        CMP R5, #314
-        ADDLT R9, R9, #1
-        CMP R5, #304
-        ADDGE R9, R9, #1
-        CMP R9, #4
-        BNE check_paddle2
+
+CHECK_PADDLE_1
+        ; === Load PADDLE 1 coordinates ===
+        LDR     R0, =PADDLE_1_X1
+        LDRH    R6, [R0]        ; R6 = X1
+        LDR     R0, =PADDLE_1_X2
+        LDRH    R7, [R0]        ; R7 = X2
+        LDR     R0, =PADDLE_1_Y1
+        LDRH    R8, [R0]        ; R8 = Y1
+        LDR     R0, =PADDLE_1_Y2
+        LDRH    R9, [R0]        ; R9 = Y2
+
+	; === Paddle 1 Collision Check ===
+        MOV R10, #0
+        CMP R4, R6
+        ADDLT R10, R10, #1
+        CMP R4, R7
+        ADDGE R10, R10, #1
+        CMP R5, R8
+        ADDLT R10, R10, #1
+        CMP R5, R9
+        ADDGE R10, R10, #1
+        CMP R10, #4
+        BNE CHECK_PADDLE_2          ;if not equat go to check wall
+	
         ; Invert X_VELOCITY
         LDR R0, =X_VELOCITY
         LDR R1, [R0]
         RSBS R1, R1, #0
         STR R1, [R0]
 
-check_paddle2
-        ; === Paddle 2 Collision Check ===
-        MOV R9, #0
-        CMP R4, #234
-        ADDLT R9, R9, #1
-        CMP R4, #224
-        ADDGE R9, R9, #1
-        CMP R5, #14
-        ADDLT R9, R9, #1
-        CMP R5, #4
-        ADDGE R9, R9, #1
-        CMP R9, #4
-        BNE check_wall
+
+CHECK_PADDLE_2
+        ; === Load PADDLE 2 coordinates ===
+        LDR     R0, =PADDLE_2_X1
+        LDRH    R6, [R0]        ; R6 = X1
+        LDR     R0, =PADDLE_2_X2
+        LDRH    R7, [R0]        ; R7 = X2
+        LDR     R0, =PADDLE_2_Y1
+        LDRH    R8, [R0]        ; R8 = Y1
+        LDR     R0, =PADDLE_2_Y2
+        LDRH    R9, [R0]        ; R9 = Y2
+
+	; === Paddle 2 Collision Check ===
+        MOV R10, #0
+        CMP R4, R6
+        ADDLT R10, R10, #1
+        CMP R4, R7
+        ADDGE R10, R10, #1
+        CMP R5, R8
+        ADDLT R10, R10, #1
+        CMP R5, R9
+        ADDGE R10, R10, #1
+        CMP R10, #4
+        BNE CHECK_WALL          ;if not equat go to check wall
+	
         ; Invert X_VELOCITY
         LDR R0, =X_VELOCITY
         LDR R1, [R0]
         RSBS R1, R1, #0
         STR R1, [R0]
 
-check_wall
+CHECK_WALL
         ; === Top/Bottom Wall Bounce ===
         CMP R4, #0
         BEQ invert_y
         CMP R4, #240
         BEQ invert_y
-        B check_goal
-
+        B CHECK_GOAL
 invert_y
         LDR R0, =Y_VELOCITY
         LDR R1, [R0]
         RSBS R1, R1, #0
         STR R1, [R0]
 
-check_goal
-        ; === Y = 0: Player 2 Scores ===
-        LDR R0, =Y_BALL
+CHECK_GOAL
+        ; === IF X = 0: Player 2 Scores ===
+        LDR R0, =X_BALL
         LDR R1, [R0]
         CMP R1, #0
-        BNE check_p1_goal
+        BNE PLAYER_1_GOAL
+	
+PLAYER_2_GOAL	
         LDR R2, =P2_SCORE
         LDR R3, [R2]
         ADD R3, R3, #1
         STR R3, [R2]
         B reset_ball
 
-check_p1_goal
-        ; === Y = 320: Player 1 Scores ===
+PLAYER_1_GOAL
+        ; === X = 320: Player 1 Scores ===
         CMP R1, #320
         BNE done
         LDR R2, =P1_SCORE
@@ -237,7 +292,7 @@ check_p1_goal
         ADD R3, R3, #1
         STR R3, [R2]
 
-reset_ball
+RESET_BALL
         ; Reset ball to center
         LDR R0, =Y_BALL
         MOV R1, #160
@@ -245,9 +300,10 @@ reset_ball
         LDR R0, =X_BALL
         STR R1, [R0]
 
-done
         POP {R4-R9, PC}
 
+done
+        POP {R4-R9, PC}
 
 
 ; *************************************************************
@@ -310,3 +366,5 @@ DrawSquare_Loop
 
     POP {R0-R12, LR}
     BX LR
+
+    END
