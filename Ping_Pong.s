@@ -1,3 +1,6 @@
+
+	EXPORT PING_PONG_MODE
+
 AREA MYDATA, DATA, READWRITE    ; Declare the GameData section
 
 ; ---------- COLORS ----------
@@ -37,7 +40,8 @@ PADDLE_Y1            DCW     100
 
 PADDLE_X2            DCW     270
 PADDLE_Y2            DCW     100
-					
+
+     
 PING_PONG_MODE
 
 	PUSH {R0-R12, LR}
