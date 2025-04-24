@@ -29,37 +29,7 @@
     
 	EXPORT __main
 		
-    AREA MYDATA, DATA, READWRITE    ; Declare the GameData section
-
-; ---------- COLORS ----------
-
-Red     EQU 0x001F   ; 00000 000000 11111
-Green   EQU 0x07E0   ; 00000 111111 00000
-Blue    EQU 0xF800   ; 11111 000000 00000
-Yellow  EQU 0x06FF   ; 11111 111111 00000
-White   EQU 0xFFFF   ; 11111 111111 11111
-Black   EQU 0x0000   ; 00000 000000 00000
-
-; PADDLE DATA
-
-PADDLE_WIDTH         DCW     10
-PADDLE_HEIGHT        DCW     40
-PADDLE_COLOR         DCW     3
-PADDLE_SPEED         DCW     2
-
-; BALL DATA
-BALL_X               DCW     170
-BALL_Y               DCW     110
-BALL_VELOCITY_X      DCW     2
-Ball_VELOCITY_Y      DCW     2
-BALL_COLOR           DCB     0
-
-; SCORE DATA AND LIVES
-SCORE                DCB     "SCORE: $"
-
-SCORE_COUNT_PLAYER_1 DCW     0
-SCORE_COUNT_PLAYER_2 DCW     0
-
+    
 ; STRING DATA
 string1              DCB     "ONE PLAYER MODE => 2.", 13, 10, "$"
 string2              DCB     "CO-OP PING PONG  => 4.", 13, 10, "$"
