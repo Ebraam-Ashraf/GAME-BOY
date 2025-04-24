@@ -25,6 +25,19 @@ BALL_COLOR           DCB     0
 SCORE_COUNT_PLAYER_1 DCW     0
 SCORE_COUNT_PLAYER_2 DCW     0
 
+; ESCAPE STATUS
+ESCSTATUS            DCB     0
+
+; TWO PLAYER MODE PADDLE DATA
+PADDLE_COLOR1        DCB     8
+PADDLE_COLOR2        DCB     8
+
+PADDLE_X1            DCW     50
+PADDLE_Y1            DCW     100
+
+PADDLE_X2            DCW     270
+PADDLE_Y2            DCW     100
+					
 PING_PONG_MODE
 
 	PUSH {R0-R12, LR}
