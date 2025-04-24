@@ -187,7 +187,23 @@ PING_PONG_MODE
 
 EXIT
 	BX LR
-	
+
+
+
+ PING_PONG_MODE
+    LOOP:
+        BL BALL_CHECK_MOVE        ; Move the ball, handle collisions, etc.
+
+        ; Read PB5 status (we can simulate or read GPIO directly)
+        LDR R0, =0x40010C08       ; GPIOB_IDR address
+        LDR R1, [R0]              ; Read full IDR (32-bit)
+        MOV R2, #0x20             ; Mask for bit 5 (PB5)
+        TST R1, R2                ; Check if PB5 is high
+
+        BNE EXIT                  ; If PB5 is high (pressed), exit
+
+        B LOOP                    ; Else repeat
+
 ONE_PLAYER_MODE
 	BX LR
 
