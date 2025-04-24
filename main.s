@@ -18,6 +18,7 @@
     IMPORT Delay
     IMPORT font_map
     IMPORT Read_Keys
+    
     ;Graphics
     IMPORT Draw_Pixel
     IMPORT Draw_Char
@@ -26,6 +27,9 @@
     IMPORT Draw_Rectangle	
     IMPORT Clear_Screen
     IMPORT Init_Screen
+    
+    ;PING_PONG_MODE
+    IMPORT PING_PONG_MODE
     
 	EXPORT __main
 		
@@ -38,9 +42,9 @@ White   EQU 0xFFFF   ; 11111 111111 11111
 Black   EQU 0x0000   ; 00000 000000 00000
 
 ; STRING DATA
-string1              DCB     "ONE PLAYER MODE => 2.", 13, 10, "$"
-string2              DCB     "CO-OP PING PONG  => 4.", 13, 10, "$"
-string3              DCB     "Exit => Esc.", 13, 10, "$"
+string1              DCB     "ONE PLAYER MODE => KEY 1 $"
+string2              DCB     "CO-OP PING PONG => KEY 2 $"
+string3              DCB     "Exit => KEY 5 $"
 
 	
 
@@ -50,27 +54,40 @@ __main FUNCTION
 	
     BL GPIO_Init
 
-    
-Options_page
     ; Clear the screen colour
     BL      TFT_FillScreen
 
-    ; Display option strings
-    MOV     R0, #10                ; Row (approximately 10 for the first string)
-    MOV     R1, #32                ; Column (approximately 32 for horizontal centering)
-    LDR     R2, =string1           ; Load address of first string
-    BL      Draw_Msg               ; Print string
 
-    MOV     R0, #12                ; Row (approximately 12 for the second string)
-    MOV     R1, #30                ; Column (approximately 30 for horizontal centering)
-    LDR     R2, =string2           ; Load address of second string
-    BL      Draw_Msg	           ; Print string
+    ; ---------- Display Text Options Using Draw_Msg ----------
+    ; Assumes:
+    ; R9 = string pointer
+    ; R4 = text color (foreground)
+    ; R5 = background color
+    ; R6 = X coordinate
+    ; R7 = Y coordinate
+    ; R8 = size (can leave unset if unused)
 
-    MOV     R0, #14                ; Row (approximately 14 for third string)
-    MOV     R1, #29                ; Column (approximately 29 for horizontal centering)
-    LDR     R2, =string3           ; Load address of third string
-    BL      Draw_Msg	           ; Print string
+        LDR     R4, =White         ; Text color
+        LDR     R5, =Black         ; Background color
 
+        ; --- First string ---
+        MOV     R6, #32            ; X position
+        MOV     R7, #10            ; Y position
+        LDR     R9, =string1
+        BL      Draw_Msg
+
+        ; --- Second string ---
+        MOV     R6, #30
+        MOV     R7, #12
+        LDR     R9, =string2
+        BL      Draw_Msg
+
+        ; --- Third string ---
+        MOV     R6, #29
+        MOV     R7, #14
+        LDR     R9, =string3
+        BL      Draw_Msg
+	
     ; Wait for key press
 REENTER BL      Read_Keys           ; Call function to detect key press
 	
