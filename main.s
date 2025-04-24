@@ -29,25 +29,20 @@
     
 	EXPORT __main
 		
-    
+; ---------- COLORS ----------
+Red     EQU 0x001F   ; 00000 000000 11111
+Green   EQU 0x07E0   ; 00000 111111 00000
+Blue    EQU 0xF800   ; 11111 000000 00000
+Yellow  EQU 0x06FF   ; 11111 111111 00000
+White   EQU 0xFFFF   ; 11111 111111 11111
+Black   EQU 0x0000   ; 00000 000000 00000
+
 ; STRING DATA
 string1              DCB     "ONE PLAYER MODE => 2.", 13, 10, "$"
 string2              DCB     "CO-OP PING PONG  => 4.", 13, 10, "$"
 string3              DCB     "Exit => Esc.", 13, 10, "$"
 
-; ESCAPE STATUS
-ESCSTATUS            DCB     0
-
-; TWO PLAYER MODE PADDLE DATA
-PADDLE_COLOR1        DCB     8
-PADDLE_COLOR2        DCB     8
-
-PADDLE_X1            DCW     50
-PADDLE_Y1            DCW     100
-
-PADDLE_X2            DCW     270
-PADDLE_Y2            DCW     100
-						
+	
 
             AREA    MYcode, CODE, READONLY
 		
