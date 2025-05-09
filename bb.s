@@ -135,11 +135,11 @@ DELAY_INTERVAL  EQU     0x90000
 
         ; PADDLE 1
         LDR     R0, =PADDLE_1_X1
-        MOV     R1, #0x50
+        MOV     R1, #0x10
         STRH    R1, [R0]
 
         LDR     R0, =PADDLE_1_X2
-        MOV     R1, #0x70
+        MOV     R1, #0x30
         STRH    R1, [R0]
 
         LDR     R0, =PADDLE_1_Y1
@@ -152,11 +152,11 @@ DELAY_INTERVAL  EQU     0x90000
 
         ; PADDLE 2
         LDR     R0, =PADDLE_2_X1
-        MOV     R1, #0x250
+        MOV     R1, #0x290
         STRH    R1, [R0]
 
         LDR     R0, =PADDLE_2_X2
-        MOV     R1, #0x270
+        MOV     R1, #0x310
         STRH    R1, [R0]
 
         LDR     R0, =PADDLE_2_Y1
