@@ -7,7 +7,7 @@
 ; CS    =   PA11	Chip Select	    Enable the TFT,(active low)
 ; RST   =   PA12	Reset		    Reset the TFT (active low)
 ; D0-7  =   PB0-4	5 Keys
-
+; PB5-9 keys
 		
     ;TFT
     IMPORT GPIO_Init
