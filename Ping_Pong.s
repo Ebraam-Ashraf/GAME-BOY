@@ -22,6 +22,29 @@
 ;   |      RS   =  PE12     |
 ;   |      CS   =  PE15     |
 ;   +-----------------------+
+
+
+;                          TFT Coordinate System (240x320)
+;
+;  --------------------------------------------------------------------------------->
+;  |(240)                                                     X-axis (right) 320
+;  |                                                        Y1
+;  |                                                          |█|
+;  |                              ●                     X1 |█|  X2
+;  |       |█|                                             |█|
+;  |       |█|                                             |█|
+;  |       |█|                                             |█|
+;  |       |█|                                             Y2
+;  |       |█|
+;  |
+;  |  Player 1 Paddle                     Player 2 Paddle
+;  |
+;  |
+;  v
+;
+;  Y-axis (down)0
+
+
         AREA    MyData, DATA, READWRITE
 
 PADDLE_WIDTH         SPACE    2
