@@ -835,13 +835,10 @@ BALL_CHECK_MOVE
 
         ; === Erase old ball ===
         MOV R1, #Black
-
-	    LDR R5, =BALL_Y
+	LDR R5, =BALL_Y
         LDRH R5, [R5]
-
-	    LDR R6, =BALL_X
+	LDR R6, =BALL_X
         LDRH R6, [R6]
-
         BL TFT_DrawSquare
 
         ; === Update Ball Position ===
@@ -864,13 +861,10 @@ BALL_CHECK_MOVE
 
         ; === Draw updated ball ===
         MOV R1, #Red
-
-	    LDR R5, =BALL_Y
+	LDR R5, =BALL_Y
         LDRH R5, [R5]
-
-	    LDR R6, =BALL_X
+	LDR R6, =BALL_X
         LDRH R6, [R6]
-
         BL TFT_DrawSquare
 
 
@@ -895,7 +889,7 @@ CHECK_PADDLE_1
         LDR     R0, =PADDLE_1_Y2
         LDRH    R9, [R0]        ; R9 = Y2
 
-	    ; === Paddle 1 Collision Check ===
+	; === Paddle 1 Collision Check ===
         MOV R10, #0
         CMP R4, R6
         ADDLT R10, R10, #1
@@ -926,7 +920,7 @@ CHECK_PADDLE_2
         LDR     R0, =PADDLE_2_Y2
         LDRH    R9, [R0]        ; R9 = Y2
 
-	    ; === Paddle 2 Collision Check ===
+	; === Paddle 2 Collision Check ===
         MOV R10, #0
         CMP R4, R6
         ADDLT R10, R10, #1
@@ -947,9 +941,9 @@ CHECK_PADDLE_2
 
 CHECK_WALL
         ; === Top/Bottom Wall Bounce ===
-        CMP R4, #0
+        CMP R5, #0
         BEQ invert_y
-        CMP R4, #240
+        CMP R5, #240
         BEQ invert_y
         B CHECK_GOAL
 invert_y
@@ -960,10 +954,23 @@ invert_y
 
 CHECK_GOAL
         ; === IF X = 0: Player 2 Scores ===
-        LDR R0, =BALL_X
-        LDRH R1, [R0]
-        CMP R1, #0
-        BNE PLAYER_1_GOAL
+        CMP R4, #0
+        BEQ PLAYER_2_GOAL
+	
+	; === IF X = 320: Player 1 Scores ===
+        CMP R4, #320
+        BEQ PLAYER_1_GOAL
+	
+	B done
+	
+PLAYER_1_GOAL
+        CMP R1, #320
+        BNE done
+        LDR R2, =P1_SCORE
+        LDRH R3, [R2]
+        ADD R3, R3, #1
+        STRH R3, [R2]
+	B RESET_BALL
 	
 PLAYER_2_GOAL	
         LDR R2, =P2_SCORE
@@ -972,14 +979,6 @@ PLAYER_2_GOAL
         STRH R3, [R2]
         B RESET_BALL
 
-PLAYER_1_GOAL
-        ; === X = 320: Player 1 Scores ===
-        CMP R1, #320
-        BNE done
-        LDR R2, =P1_SCORE
-        LDRH R3, [R2]
-        ADD R3, R3, #1
-        STRH R3, [R2]
 
 RESET_BALL
         ; Reset ball to center
@@ -990,7 +989,15 @@ RESET_BALL
         LDR R0, =BALL_X
         MOV R1, #180
         STRH R1, [R0]
-
+	
+	; === Erase old ball ===
+        MOV R1, #Black
+	LDR R5, =BALL_Y
+        LDRH R5, [R5]
+	LDR R6, =BALL_X
+        LDRH R6, [R6]
+        BL TFT_DrawSquare
+	
         POP {R0-R12, PC}
 
 done
