@@ -473,12 +473,12 @@ TFT_DrawSquare
     PUSH {LR}
     ;TODO
 	MOV R8, R5
-    SUB R8, R8, #10      ; x_start
-    ADD R10, R5, #10     ; x_end
+    SUB R8, R8, #5      ; x_start
+    ADD R10, R5, #5     ; x_end
 
     MOV R9, R6
-    SUB R9, R9, #10      ; y_start
-    ADD R11, R6, #10     ; y_end
+    SUB R9, R9, #5      ; y_start
+    ADD R11, R6, #5     ; y_end
 
     ; Set Column Address
     MOV R0, #0x2A
@@ -513,7 +513,7 @@ TFT_DrawSquare
     AND R3, R1, #0xFF   ; Low byte
 
     ; Write pixels (width = 20, height = 20)
-    MOV R4, #400
+    MOV R4, #100
 DrawSquare_Loop
     MOV R0, R2
     BL TFT_WriteData
