@@ -66,7 +66,7 @@ Mario		EQU 0xc241
 
 ; Define register base addresses
 RCC_BASE        EQU     0x40023800
-GPIOA_BASE      EQU     0x40021000 ; CHANGE THE ADDRESS TO THE CORRECT ONE (FOR: IBRAHIM ABOHOLA)
+GPIOA_BASE      EQU     0x40020000 ; CHANGE THE ADDRESS TO THE CORRECT ONE (FOR: IBRAHIM ABOHOLA)
 GPIOB_BASE      EQU     0x40020400
 
 ; Define register offsets
@@ -87,6 +87,8 @@ TFT_CS          EQU     (1 << 15)
 
 DELAY_INTERVAL  EQU     0x90000 
 	AREA RESET, CODE, READONLY
+__main FUNCTION
+
  ; Initialize values
         LDR     R0, =PADDLE_WIDTH
         MOV     R1, #20
@@ -98,11 +100,11 @@ DELAY_INTERVAL  EQU     0x90000
 
         ; BALL
         LDR     R0, =BALL_X
-        MOV     R1, #0x170
+        MOV     R1, #170
         STRH    R1, [R0]
 
         LDR     R0, =BALL_Y
-        MOV     R1, #0x110
+        MOV     R1, #110
         STRH    R1, [R0]
 
         LDR     R0, =BALL_VELOCITY_X
@@ -135,43 +137,42 @@ DELAY_INTERVAL  EQU     0x90000
 
         ; PADDLE 1
         LDR     R0, =PADDLE_1_X1
-        MOV     R1, #0x50
+        MOV     R1, #50
         STRH    R1, [R0]
 
         LDR     R0, =PADDLE_1_X2
-        MOV     R1, #0x70
+        MOV     R1, #70
         STRH    R1, [R0]
 
         LDR     R0, =PADDLE_1_Y1
-        MOV     R1, #0x100
+        MOV     R1, #100
         STRH    R1, [R0]
 
         LDR     R0, =PADDLE_1_Y2
-        MOV     R1, #0x140
+        MOV     R1, #140
         STRH    R1, [R0]
 
         ; PADDLE 2
         LDR     R0, =PADDLE_2_X1
-        MOV     R1, #0x250
+        MOV     R1, #250
         STRH    R1, [R0]
 
         LDR     R0, =PADDLE_2_X2
-        MOV     R1, #0x270
+        MOV     R1, #270
         STRH    R1, [R0]
 
         LDR     R0, =PADDLE_2_Y1
-        MOV     R1, #0x100
+        MOV     R1, #100
         STRH    R1, [R0]
 
         LDR     R0, =PADDLE_2_Y2
-        MOV     R1, #0x140
+        MOV     R1, #140
         STRH    R1, [R0]
 
-__main FUNCTION
     ; Enable clocks for GPIOE
     LDR R0, =RCC_BASE + RCC_AHB1ENR
     LDR R1, [R0]
-    ORR R1, R1, #(1 << 4)
+    ORR R1, R1, #0x1F
     STR R1, [R0]
     ; Configure GPIOA as General Purpose Output Mode
     LDR R0, =GPIOA_BASE + GPIO_MODER
@@ -193,41 +194,60 @@ __main FUNCTION
 	;CLEAR THE SCREEN
 	MOV R0, #Black
 	BL TFT_FillScreen
-	
+	BL delay
+	MOV R0, #Yellow
+	BL TFT_FillScreen
+	BL delay
+	MOV R0, #Green
+	MOV R1, #100
+	MOV R2, #200
+	MOV R3 ,#50
+	MOV R4, #200
+	BL Draw_Rectangle
+	BL delay
+	MOV R0, #0
+	MOV R1, #0
+	MOV R2, #0
+	MOV R3, #0
+	MOV R4, #0
+	MOV R5, #0
+	MOV R6, #0
+	MOV R7, #0
+	MOV R8, #0
+	MOV R9, #0
+	MOV R10, #0
+	MOV R11, #0
+	MOV R12, #0
 	; DRAWS PLAYER 1
 	;MOV R5, #Green
 	;LDRH R0, [R5]
 	MOV R0, #Green
-	LDR R5,=PADDLE_1_Y1
-	LDRH R1, [R5]
-	;MOV R2, R1
-	LDR R6, =PADDLE_1_Y2
-	LDRH R2, [R6]
-	;ADD R2, R5
 	LDR R5,=PADDLE_1_X1
+	LDRH R1, [R5]
+	LDR R6, =PADDLE_1_X2
+	LDRH R2, [R6]
+	LDR R5,=PADDLE_1_Y1
 	LDRH R3 ,[R5]
 	;MOV R4, R3
-	LDR R6, =PADDLE_1_X2
+	LDR R6, =PADDLE_1_Y2
 	LDRH R4, [R6]
-	;ADD R4, R5
 	BL Draw_Rectangle
 	
 	;DARWS PLAYER 2
 	;MOV R5,#Green
 	;LDRH R0, [R5]
 	MOV R0, #Green
-	LDR R5,=PADDLE_2_Y1
+	LDR R5,=PADDLE_2_X1
 	LDRH R1, [R5]
 	;MOV R2, R1
-	LDR R6, =PADDLE_2_Y2
+	LDR R6, =PADDLE_2_X2
 	LDRH R2, [R6]
 	;ADD R2, R5
-	LDR R5,=PADDLE_2_X1
+	LDR R5,=PADDLE_2_Y1
 	LDRH R3 ,[R5]
 	;MOV R4, R3
-	LDR R6, =PADDLE_2_X2
+	LDR R6, =PADDLE_2_Y2
 	LDRH R4, [R6]
-	;ADD R4, R5
 	BL Draw_Rectangle
 	
 	;DRAW THE BALL
@@ -237,25 +257,15 @@ __main FUNCTION
 	LDR R5,=BALL_Y
 	LDRH R1, [R5]
 	MOV R2, R1
-	ADD R2, #0x10 ;TODO: CHANGE THIS
+	ADD R2, #10 ;TODO: CHANGE THIS
 	LDR R5,=BALL_X
 	LDRH R3, [R5]
 	MOV R4, R3
-	ADD R4, #0x10
+	ADD R4, #10
 	BL Draw_Rectangle
-	    ; Fill screen with color
-	;push {R0}
-	;MOV R0, #Black
-	;BL TFT_FillScreen
-	;pop {R0}
-	;BL TFT_FillbottomGreen
-	;BL TFT_FillTopGreen
-	;MOV R5, #100
-	;MOV R6, #40
-	;MOV R1 , #Pink
-	;BL TFT_DrawSquare
+	; Fill screen with color
+
 MAIN_LOOP	
-	;BL GET_state return in R7 1 for pushed and 0 for nonpushed
 	BL PING_PONG_MOVE_PLAYERS
 	BL BALL_CHECK_MOVE
 	BL delay
@@ -350,7 +360,8 @@ TFT_Init
 
     ; Reset sequence
     LDR R1, =GPIOA_BASE + GPIO_ODR
-    LDR R2, [R1]    
+    LDR R2, [R1]
+    
     ; Reset low
     BIC R2, R2, #TFT_RST
     STR R2, [R1]
@@ -372,9 +383,11 @@ TFT_Init
     BL TFT_WriteCommand
     BL delay
 	
-    ; Enable Color Inversion
-    MOV R0, #0x21      ; Command for Color Inversion ON
-    BL TFT_WriteCommand
+	 ;memory accsess
+	MOV R0, #0x36       ; MADCTL command
+	BL TFT_WriteCommand
+	MOV R0, #0x48       ; Parameter value (see explanation below)
+	BL TFT_WriteData
 
     
     ; Display ON
@@ -383,6 +396,7 @@ TFT_Init
 
     POP {R0-R2, LR}
     BX LR
+	
 	LTORG
 	ALIGN
 ; *************************************************************
@@ -751,7 +765,7 @@ PING_PONG_MODE
 	;DARWS PLAYER 2
 	;MOV R5,#Green
 	;LDRH R0, [R5]
-	MOV R0, #Green
+	MOV R0, #White
 	LDR R5,=PADDLE_2_Y1
 	LDRH R1, [R5]
 	;MOV R2, R1
@@ -769,7 +783,7 @@ PING_PONG_MODE
 	;DRAW THE BALL
 	;MOV R5,#Red
 	;LDRH R0, [R5]
-	MOV R0, #Green
+	MOV R0, #Red
 	LDR R5,=BALL_Y
 	LDRH R1, [R5]
 	MOV R2, R1
@@ -797,21 +811,21 @@ PING_PONG_MOVE_PLAYERS
 	;TODO: CHECK IF THE PLAYER REACHED Y = 240 (END OF SCREEN)
 	LDR R5, =PADDLE_1_Y1	;TODO: CHECK IF THE PLAYER REACHED Y = 200 (END OF SCREEN)
 	LDRH R1, [R5]
-	CMP R1, #0x200
+	CMP R1, #200
 	BCS END_MOVE_PLAYER_1
 						; ERASES PLAYER 1 AND REDRAWS PLAYER 1 DOWN 10 PIXELS
 	LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
 	LDRH R0, [R5]
-	LDR R5,=PADDLE_1_Y1
+	LDR R5,=PADDLE_1_X1
 	LDRH R1, [R5]
 	;MOV R2, R1
-	LDR R6, =PADDLE_1_Y2
+	LDR R6, =PADDLE_1_X2
 	LDRH R2, [R6]
 	;ADD R2, R5
-	LDR R5,=PADDLE_1_X1
+	LDR R5,=PADDLE_1_Y1
 	LDRH R3 ,[R5]
 	;MOV R4, R3
-	LDR R6, =PADDLE_1_X2
+	LDR R6, =PADDLE_1_Y2
 	LDRH R4, [R6]
 	;ADD R4, R5
 	BL Draw_Rectangle 
@@ -821,21 +835,18 @@ PING_PONG_MOVE_PLAYERS
 	;MOV R5,#Green
 	;LDRH R0, [R5]
 	MOV R0, #Green
-	LDR R5,=PADDLE_1_Y1
-	LDRH R1, [R5]
-	ADD R1, R1,#0x10	;ADDING 10 DECIMAL TO Y1
-	STRH R1, [R5]	;STORING THE NEW POSITION OF PLAYER 1
-	;MOV R2, R1
-	LDR R6, =PADDLE_1_Y2
-	LDRH R2, [R6]
-	ADD R2, R2, #0x10
-	STRH R2, [R6]
 	LDR R5,=PADDLE_1_X1
-	LDRH R3 ,[R5]
-	;MOV R4, R3
+	LDRH R1, [R5]
 	LDR R6, =PADDLE_1_X2
+	LDRH R2, [R6]
+	LDR R5,=PADDLE_1_Y1
+	LDRH R3 ,[R5]
+	ADD R3, R3,#10	;ADDING 10 DECIMAL TO Y1
+	STRH R3, [R5]	;STORING THE NEW POSITION OF PLAYER 1
+	LDR R6, =PADDLE_1_Y2
 	LDRH R4, [R6]
-	;ADD R4, R5
+	ADD R4, R4, #10
+	STRH R4, [R6]	
 	BL Draw_Rectangle
 	;
 	B END_MOVE_PLAYER_1
@@ -847,21 +858,21 @@ PLAYER_1_UP				; CHECK UP FOR PLAYER 1
 	
 	LDR R5, =PADDLE_1_Y1	;TODO: CHECK IF THE PLAYER REACHED Y = 0 (END OF SCREEN)
 	LDRH R1, [R5]
-	CMP R1, #0x0
+	CMP R1, #0
 	BLE END_MOVE_PLAYER_1
 						; ERASES PLAYER 1 AND REDRAWS PLAYER 1 UP 10 PIXELS
 	LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
 	LDRH R0, [R5]
-	LDR R5,=PADDLE_1_Y1
+	LDR R5,=PADDLE_1_X1
 	LDRH R1, [R5]
 	;MOV R2, R1
-	LDR R6, =PADDLE_1_Y2
+	LDR R6, =PADDLE_1_X2
 	LDRH R2, [R6]
 	;ADD R2, R5
-	LDR R5,=PADDLE_1_X1
+	LDR R5,=PADDLE_1_Y1
 	LDRH R3 ,[R5]
 	;MOV R4, R3
-	LDR R6, =PADDLE_1_X2
+	LDR R6, =PADDLE_1_Y2
 	LDRH R4, [R6]
 	;ADD R4, R5
 	BL Draw_Rectangle 
@@ -871,19 +882,19 @@ PLAYER_1_UP				; CHECK UP FOR PLAYER 1
 	;MOV R5,#Green
 	;LDRH R0, [R5]
 	MOV R0, #Green
-	LDR R5,=PADDLE_1_Y1
-	LDRH R1, [R5]
-	SUB R1, R1, #0x10	;SUBTRACTING 10 DECIMAL TO Y1 
-	STRH R1, [R5]		;STORING THE NEW POSITION OF PLAYER 1
-	;TODO: CHECK IF PLAYER 1 REACHED TOP OF SCREEN Y1 = 0 (IT ISN'T REALLY Y = 0)
-	LDR R6, =PADDLE_1_Y2
-	LDRH R2, [R6]
-	SUB R2, R2, #0x10
-	STRH R2, [R6]
 	LDR R5,=PADDLE_1_X1
-	LDRH R3 ,[R5]
+	LDRH R1, [R5]
+	;TODO: CHECK IF PLAYER 1 REACHED TOP OF SCREEN Y1 = 0 (IT ISN'T REALLY Y = 0)
 	LDR R6, =PADDLE_1_X2
+	LDRH R2, [R6]
+	LDR R5,=PADDLE_1_Y1
+	LDRH R3 ,[R5]
+	SUB R3, R3, #10	;SUBTRACTING 10 DECIMAL TO Y1 
+	STRH R3, [R5]		;STORING THE NEW POSITION OF PLAYER 1	
+	LDR R6, =PADDLE_1_Y2
 	LDRH R4, [R6]
+	SUB R4, R4, #10
+	STRH R4, [R6]	
 	BL Draw_Rectangle
 
 END_MOVE_PLAYER_1
@@ -895,19 +906,19 @@ END_MOVE_PLAYER_1
 	
 	LDR R5, =PADDLE_2_Y1	;TODO: CHECK IF THE PLAYER REACHED Y = 200 (END OF SCREEN)
 	LDRH R1, [R5]
-	CMP R1, #0x200
+	CMP R1, #200
 	BCS END_MOVE_PLAYER_2
 	
 	; ERASES PLAYER 1 AND REDRAWS PLAYER 1 DOWN 10 PIXELS
 	LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
 	LDRH R0, [R5]
-	LDR R5,=PADDLE_2_Y1
-	LDRH R1, [R5]
-	LDR R6, =PADDLE_2_Y2
-	LDRH R2, [R6]
 	LDR R5,=PADDLE_2_X1
-	LDRH R3 ,[R5]
+	LDRH R1, [R5]
 	LDR R6, =PADDLE_2_X2
+	LDRH R2, [R6]
+	LDR R5,=PADDLE_2_Y1
+	LDRH R3 ,[R5]
+	LDR R6, =PADDLE_2_Y2
 	LDRH R3, [R6]
 	BL Draw_Rectangle 
 	; DONE ERASING PLAYER 1
@@ -916,19 +927,18 @@ END_MOVE_PLAYER_1
 	;MOV R5,#Green
 	;LDRH R0, [R5]
 	MOV R0, #Green
-	LDR R5,=PADDLE_2_Y1
-	LDRH R1, [R5]
-	ADD R1, R1,#0x10	;ADDING 10 DECIMAL TO Y1
-	STRH R1, [R5]	;STORING THE NEW POSITION OF PLAYER 2
-					 
-	LDR R6, =PADDLE_2_Y2
-	LDRH R2, [R6]
-	ADD R2 , R2, #0x10
-	STRH R1, [R6]
 	LDR R5,=PADDLE_2_X1
-	LDRH R3 ,[R5]
+	LDRH R1, [R5]	 
 	LDR R6, =PADDLE_2_X2
+	LDRH R2, [R6]
+	LDR R5,=PADDLE_2_Y1
+	LDRH R3 ,[R5]
+	ADD R3, R3,#10	;ADDING 10 DECIMAL TO Y1
+	STRH R4, [R5]	;STORING THE NEW POSITION OF PLAYER 2	
+	LDR R6, =PADDLE_2_Y2
 	LDRH R4, [R6]
+	ADD R4 , R4, #10
+	STRH R4, [R6]	
 	BL Draw_Rectangle
 	
 	B END_MOVE_PLAYER_2
@@ -940,21 +950,19 @@ PLAYER_2_UP				; CHECK UP FOR PLAYER 2
 	
 	LDR R5, =PADDLE_2_Y1	;TODO: CHECK IF THE PLAYER REACHED Y = 0 (END OF SCREEN)
 	LDRH R1, [R5]
-	CMP R1, #0x0
-	BLE END_MOVE_PLAYER_1
+	CMP R1, #0
+	BLE END_MOVE_PLAYER_2
 	
 						; ERASES PLAYER 2 AND REDRAWS PLAYER 2 UP 10 PIXELS
 	LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
 	LDRH R0, [R5]
-	LDR R5,=PADDLE_2_Y1
-	LDRH R1, [R5]
-	MOV R2, R1
-	LDR R6, =PADDLE_HEIGHT
-	LDRH R5, [R6]
-	ADD R2, R5
 	LDR R5,=PADDLE_2_X1
-	LDRH R3 ,[R5]
+	LDRH R1, [R5]
 	LDR R6, =PADDLE_2_X2
+	LDRH R2, [R6]
+	LDR R5,=PADDLE_2_Y1
+	LDRH R3 ,[R5]
+	LDR R6, =PADDLE_2_Y2
 	LDRH R4, [R6]
 	BL Draw_Rectangle 
 	; DONE ERASING PLAYER 1
@@ -963,19 +971,19 @@ PLAYER_2_UP				; CHECK UP FOR PLAYER 2
 	;MOV R5,#Green
 	;LDRH R0, [R5]
 	MOV R0, #Green
-	LDR R5,=PADDLE_2_Y1
-	LDRH R1, [R5]
-	SUB R1, R1, #0x10	;SUBTRACTING 10 DECIMAL TO Y1 
-	STRH R1, [R5]		;STORING THE NEW POSITION OF PLAYER 1
-	;TODO: CHECK IF PLAYER 1 REACHED TOP OF SCREEN Y1 = 0 (IT ISN'T REALLY Y = 0)
-	LDR R6, =PADDLE_2_Y2
-	LDRH R2, [R6]
-	SUB R2, R2, #0x10
-	STRH R2, [R6]
 	LDR R5,=PADDLE_2_X1
-	LDRH R3 ,[R5]
+	LDRH R1, [R5]
+	;TODO: CHECK IF PLAYER 1 REACHED TOP OF SCREEN Y1 = 0 (IT ISN'T REALLY Y = 0)
 	LDR R6, =PADDLE_2_X2
+	LDRH R2, [R6]
+	LDR R5,=PADDLE_2_Y1
+	LDRH R3 ,[R5]
+	SUB R3, R3, #10	;SUBTRACTING 10 DECIMAL TO Y1 
+	STRH R3, [R5]		;STORING THE NEW POSITION OF PLAYER 1	
+	LDR R6, =PADDLE_2_Y2
 	LDRH R4, [R6]
+	SUB R4, R4, #10
+	STRH R4, [R6]
 	BL Draw_Rectangle
 	
 END_MOVE_PLAYER_2	
@@ -1197,65 +1205,65 @@ Draw_Rectangle
 
     ; Save color
     MOV R5, R0
-	
+    
     ; Set Column Address (0-239)
     MOV R0, #0x2A
     BL TFT_WriteCommand
-	;HIGHER EIGHT BITS OF START COLUMN
-    MOV R0, R3, LSL #8
+    ;HIGHER EIGHT BITS OF START COLUMN
+    MOV R0, R3, LSR #8 
     BL TFT_WriteData
-	;LOWER EIGHT BITS BITS OF STAET COLUMN
+    ;LOWER EIGHT BITS BITS OF START COLUMN
     MOV R0, R3
     BL TFT_WriteData
-	;HIGHER EIGHT BITS OF END COLUMN
-    MOV R0, R4, LSL #8    
+    ;HIGHER EIGHT BITS OF END COLUMN
+    MOV R0, R4, LSR #8    ;TODO
     BL TFT_WriteData
-	;LOWER EIGHT BITS OF END COLUMN
+    ;LOWER EIGHT BITS OF END COLUMN
     MOV R0, R4      
     BL TFT_WriteData
 
     ; Set Page Address (0-319)
     MOV R0, #0x2B
     BL TFT_WriteCommand
-    MOV R0, R1, LSL #8    
+    MOV R0, R1, LSR #8    
     BL TFT_WriteData
-	;LOWER EIGHT BITS OF END PAGE
+    ;LOWER EIGHT BITS OF START PAGE
     MOV R0, R1      
     BL TFT_WriteData
-    MOV R0, R2, LSL #8    
+    MOV R0, R2, LSR #8    
     BL TFT_WriteData
-	;LOWER EIGHT BITS OF END PAGE
+    ;LOWER EIGHT BITS OF END PAGE
     MOV R0, R2      
     BL TFT_WriteData
+    
     ; Memory Write
     MOV R0, #0x2C
     BL TFT_WriteCommand
 
     ; Prepare color bytes
-    MOV R1, R5, LSR #8     ; High byte
-    AND R2, R5, #0xFF      ; Low byte
+    MOV R10, R5, LSR #8     ; High byte
+    AND R9, R5, #0xFF      ; Low byte
 
-    ; Fill screen with color AREA (X2 - X1) * (Y2 - Y1)
-	SUBS R7, R4,R3
-	ADD R7, R7 ,#1	
-	SUBS R8, R2, R1
-    MUL R3, R8,R7
+    ; Calculate total pixels: (X2 - X1 + 1) * (Y2 - Y1 + 1)
+    SUBS R7, R4, R3
+    ADD R7, R7, #1    
+    SUBS R8, R2, R1
+    ADD R8, R8, #1    
+    MUL R3, R8, R7
+    
 FillLoop_RECT
     ; Write high byte
-    MOV R0, R1
+    MOV R0, R10
     BL TFT_WriteData
     
     ; Write low byte
-    MOV R0, R2
+    MOV R0, R9
     BL TFT_WriteData
     
     SUBS R3, R3, #1
     BNE FillLoop_RECT
 
-    POP {R1-R12, LR}
-    BX LR
-
-
+    POP {R1-R12, PC}
     ENDFUNC
 	ALIGN
     END
