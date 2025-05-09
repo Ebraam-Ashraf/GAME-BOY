@@ -22,29 +22,6 @@
 ;   |      RS   =  PE12     |
 ;   |      CS   =  PE15     |
 ;   +-----------------------+
-
-
-;                          TFT Coordinate System (240x320)
-;
-;    Y-axis (up)240
-;  |                                                        Y1
-;  |                                                       |█|
-;  |                              ●                     X1 |█|  X2
-;  |       |█|                                             |█|
-;  |       |█|                                             |█|
-;  |       |█|                                             |█|
-;  |       |█|                                             Y2
-;  |       |█|
-;  |
-;  |  Player 1 Paddle                                Player 2 Paddle
-;  |
-;  |
-;  ;--------------------------------------------------------------------------------->
-;                                                                           X-axis (right) 320
-;
-; 
-
-
         AREA    MyData, DATA, READWRITE
 
 PADDLE_WIDTH         SPACE    2
@@ -82,7 +59,10 @@ Green   	EQU 0x2d20  ; 00000 111111 00000
 Blue    	EQU 0x001F  ; 00000 000000 11111
 Yellow  	EQU 0xFFE0  ; 11111 111111 00000
 White   	EQU 0xFFFF  ; 11111 111111 11111
-Black   	EQU 0x0000  ; 00000 000000 00000
+Black   	EQU 0x0000  ; 00000 000000 00000 
+BabyBlue    EQU 0x8ef9
+Pink		EQU 0xfe59
+Mario		EQU 0xc241
 
 ; Define register base addresses
 RCC_BASE        EQU     0x40023800
@@ -111,7 +91,7 @@ __main FUNCTION
 
  ; Initialize values
         LDR     R0, =PADDLE_WIDTH
-        MOV     R1, #20
+        MOV     R1, #10
         STRH    R1, [R0]
 
         LDR     R0, =PADDLE_HEIGHT
@@ -120,19 +100,19 @@ __main FUNCTION
 
         ; BALL
         LDR     R0, =BALL_X
-        MOV     R1, #170
+        MOV     R1, #180
         STRH    R1, [R0]
 
         LDR     R0, =BALL_Y
-        MOV     R1, #110
+        MOV     R1, #220
         STRH    R1, [R0]
 
         LDR     R0, =BALL_VELOCITY_X
-        MOV     R1, #2
+        MOV     R1, #10
         STRH    R1, [R0]
 
         LDR     R0, =BALL_VELOCITY_Y
-        MOV     R1, #2
+        MOV     R1, #10
         STRH    R1, [R0]
 
         LDR     R0, =BALL_COLOR
@@ -161,7 +141,7 @@ __main FUNCTION
         STRH    R1, [R0]
 
         LDR     R0, =PADDLE_1_X2
-        MOV     R1, #70
+        MOV     R1, #60
         STRH    R1, [R0]
 
         LDR     R0, =PADDLE_1_Y1
@@ -174,7 +154,7 @@ __main FUNCTION
 
         ; PADDLE 2
         LDR     R0, =PADDLE_2_X1
-        MOV     R1, #250
+        MOV     R1, #260
         STRH    R1, [R0]
 
         LDR     R0, =PADDLE_2_X2
@@ -214,17 +194,6 @@ __main FUNCTION
 	;CLEAR THE SCREEN
 	MOV R0, #Black
 	BL TFT_FillScreen
-	BL delay
-	MOV R0, #Yellow
-	BL TFT_FillScreen
-	BL delay
-	MOV R0, #Green
-	MOV R1, #100
-	MOV R2, #200
-	MOV R3 ,#50
-	MOV R4, #200
-	BL Draw_Rectangle
-	BL delay
 	MOV R0, #0
 	MOV R1, #0
 	MOV R2, #0
@@ -238,8 +207,9 @@ __main FUNCTION
 	MOV R10, #0
 	MOV R11, #0
 	MOV R12, #0
-
 	; DRAWS PLAYER 1
+	;MOV R5, #Green
+	;LDRH R0, [R5]
 	MOV R0, #Green
 	LDR R5,=PADDLE_1_X1
 	LDRH R1, [R5]
@@ -247,32 +217,42 @@ __main FUNCTION
 	LDRH R2, [R6]
 	LDR R5,=PADDLE_1_Y1
 	LDRH R3 ,[R5]
+	;MOV R4, R3
 	LDR R6, =PADDLE_1_Y2
 	LDRH R4, [R6]
 	BL Draw_Rectangle
 	
 	;DARWS PLAYER 2
+	;MOV R5,#Green
+	;LDRH R0, [R5]
 	MOV R0, #Green
 	LDR R5,=PADDLE_2_X1
 	LDRH R1, [R5]
+	;MOV R2, R1
 	LDR R6, =PADDLE_2_X2
 	LDRH R2, [R6]
+	;ADD R2, R5
 	LDR R5,=PADDLE_2_Y1
 	LDRH R3 ,[R5]
+	;MOV R4, R3
 	LDR R6, =PADDLE_2_Y2
 	LDRH R4, [R6]
 	BL Draw_Rectangle
 	
 	;DRAW THE BALL
-    MOV R1, #Red
-
-	LDR R5, =BALL_Y
-    LDRH R5, [R5]
-
-	LDR R6, =BALL_X
-    LDRH R6, [R6]
-
-    BL TFT_DrawSquare
+	;MOV R5,#Red
+	;LDRH R0, [R5]
+	MOV R0, #Red
+	LDR R5,=BALL_Y
+	LDRH R1, [R5]
+	MOV R2, R1
+	ADD R2, #10 ;TODO: CHANGE THIS
+	LDR R5,=BALL_X
+	LDRH R3, [R5]
+	MOV R4, R3
+	ADD R4, #10
+	BL Draw_Rectangle
+	; Fill screen with color
 
 MAIN_LOOP	
 	BL PING_PONG_MOVE_PLAYERS
@@ -280,6 +260,8 @@ MAIN_LOOP
 	BL delay
 	B MAIN_LOOP
 	
+	
+
     B .
 
 ; *************************************************************
@@ -406,7 +388,6 @@ TFT_Init
 	
 	LTORG
 	ALIGN
-
 ; *************************************************************
 ; TFT Fill Screen (R0 = 16-bit color)
 ; *************************************************************
@@ -465,10 +446,161 @@ FillLoop
     POP {R1-R5, LR}
     BX LR
 
-
+	
+	
+	; *************************************************************
+; Fill Top Third (Red)
 ; *************************************************************
+
+TFT_FillTopGreen
+    PUSH {R1-R5, LR}
+    MOV R5, #Mario
+
+    ; Set Column (0 239)
+    MOV R0, #0x2A
+    BL TFT_WriteCommand
+    MOV R0, #0x00  ; Start XH
+    BL TFT_WriteData
+    MOV R0, #0xA0  ; Start XL
+    BL TFT_WriteData
+    MOV R0, #0x00  ; End XH
+    BL TFT_WriteData
+    MOV R0, #0xEF  ; End XL (80)
+    BL TFT_WriteData
+
+    ; Set Page (0 319)
+    MOV R0, #0x2B
+    BL TFT_WriteCommand
+    MOV R0, #0x00  ; Start YH
+    BL TFT_WriteData
+    MOV R0, #0x00  ; Start YL
+    BL TFT_WriteData
+    MOV R0, #0x01  ; End YH
+    BL TFT_WriteData
+    MOV R0, #0x3F  
+    BL TFT_WriteData
+
+    ; Start Memory Write
+    MOV R0, #0x2C
+    BL TFT_WriteCommand
+
+    MOV R1, R5, LSR #8
+    AND R2, R5, #0xFF
+    LDR R3, =25600  ; 240 x 80
+
+FillGT
+    MOV R0, R1
+    BL TFT_WriteData
+    MOV R0, R2
+    BL TFT_WriteData
+    SUBS R3, R3, #1
+    BNE FillGT
+
+    POP {R1-R5, LR}
+    BX LR
+
+
+TFT_FillbottomGreen
+    PUSH {R1-R5, LR}
+    MOV R5, #Mario
+
+    ; Set Column (0 239)
+    MOV R0, #0x2A
+    BL TFT_WriteCommand
+    MOV R0, #0x00  ; Start XH
+    BL TFT_WriteData
+    MOV R0, #0x00  ; Start XL
+    BL TFT_WriteData
+    MOV R0, #0x00  ; End XH
+    BL TFT_WriteData
+    MOV R0, #0x27 ; End XL (80)
+    BL TFT_WriteData
+
+    ; Set Page (0 319)
+    MOV R0, #0x2B
+    BL TFT_WriteCommand
+    MOV R0, #0x00  ; Start YH
+    BL TFT_WriteData
+    MOV R0, #0x00  ; Start YL
+    BL TFT_WriteData
+    MOV R0, #0x01  ; End YH
+    BL TFT_WriteData
+    MOV R0, #0x3F  
+    BL TFT_WriteData
+
+    ; Start Memory Write
+    MOV R0, #0x2C
+    BL TFT_WriteCommand
+
+    MOV R1, R5, LSR #8
+    AND R2, R5, #0xFF
+    LDR R3, =12800  ; 240 x 80
+
+FillGB
+    MOV R0, R1
+    BL TFT_WriteData
+    MOV R0, R2
+    BL TFT_WriteData
+    SUBS R3, R3, #1
+    BNE FillGB
+
+    POP {R1-R5, LR}
+    BX LR
+	
+	; *************************************************************
 ; Draw Square Center at (y=R5, x=R6 ,Color=R1)
 ; *************************************************************
+
+; *************************************************************
+; ReDraw Square Centered at (x=R5, y=R6 ,ColorBackground=R1, ColorSquare=R2,Direction=R7 (0->Nochange,1->Up 2->Down 3->Left 4->right))
+; *************************************************************
+TFT_ReDrawSquare
+	PUSH{LR}
+	
+	MOV R7, #1 ;temp for testing
+	
+	CMP R7, #0   ; Compare the contents of R0 with VALUE
+    BEQ down    ; If R0 == VALUE, branch to LabelName
+	
+	CMP R7, #1   ; Compare the contents of R0 with VALUE
+    BEQ up
+	
+
+
+
+down
+	MOV R1,#Black
+	BL TFT_DrawSquare
+	MOV R1,#Pink
+	
+	add R5, #-10 
+	
+	CMP R5, #50
+	BEQ ENDS
+	
+	BL TFT_DrawSquare
+	B end_get_states
+up
+	MOV R1,#Black
+	BL TFT_DrawSquare
+	MOV R1,#Pink
+	
+	add R5, #10
+	
+	CMP R5, #150
+	BEQ ENDS
+	
+	BL TFT_DrawSquare
+	B end_get_state
+	
+end_get_states
+    pop{LR}
+    BX LR
+ENDS
+	BL TFT_DrawSquare
+    B ENDS
+
+
 TFT_DrawSquare
     PUSH {LR}
     ;TODO
@@ -522,8 +654,63 @@ DrawSquare_Loop
     SUBS R4, R4, #1
     BNE DrawSquare_Loop
 	
+
+	
 	POP {LR}
     BX LR
+	
+	; *************************************************************
+; GET STATE  (0->Nochange,1->Up 2->Down 3->Left 4->Right) In R7
+; *************************************************************
+GET_state
+    PUSH {LR}
+    ; Default state (no change)
+    MOV R7, #0
+
+    ; Read GPIOB input
+    LDR R0, =GPIOB_BASE + GPIO_IDR
+    LDR R1, [R0]
+
+    ; Check PB0 (bit 0)
+    TST R1, #0x01
+    BNE button0_pressed
+
+    ; Check PB1 (bit 1)
+    TST R1, #0x02
+    BNE button1_pressed
+
+    ; Check PB2 (bit 2)
+    TST R1, #0x04
+    BNE button2_pressed
+
+    ; Check PB3 (bit 3)
+    TST R1, #0x08
+    BNE button3_pressed
+
+    ; No button pressed
+    B end_get_state
+
+button0_pressed
+    MOV R7, #1
+    B end_get_state
+
+button1_pressed
+    MOV R7, #2
+    B end_get_state
+
+button2_pressed
+    MOV R7, #3
+    B end_get_state
+
+button3_pressed
+    MOV R7, #4
+    B end_get_state
+
+end_get_state
+    POP {PC}
+    BX LR
+	
+	
 	
 	
 delay
@@ -534,7 +721,6 @@ delay_loop
     BNE delay_loop
     POP {R0, LR}
     BX LR
-
 ;*******************************************
 ;THIS FUNCTION STARTS THE GAME BY DRAWING THE PLAYER AND THE BALL
 ;*******************************************
@@ -548,39 +734,53 @@ PING_PONG_MODE
 	BL TFT_FillScreen
 	
 	; DRAWS PLAYER 1
+	;MOV R5, #Green
+	;LDRH R0, [R5]
 	MOV R0, #Green
 	LDR R5,=PADDLE_1_Y1
 	LDRH R1, [R5]
+	;MOV R2, R1
 	LDR R6, =PADDLE_1_Y2
 	LDRH R2, [R6]
+	;ADD R2, R5
 	LDR R5,=PADDLE_1_X1
 	LDRH R3 ,[R5]
+	;MOV R4, R3
 	LDR R6, =PADDLE_1_X2
 	LDRH R4, [R6]
+	;ADD R4, R5
 	BL Draw_Rectangle
 	
 	;DARWS PLAYER 2
+	;MOV R5,#Green
+	;LDRH R0, [R5]
 	MOV R0, #Green
 	LDR R5,=PADDLE_2_Y1
 	LDRH R1, [R5]
+	;MOV R2, R1
 	LDR R6, =PADDLE_2_Y2
 	LDRH R2, [R6]
+	;ADD R2, R5
 	LDR R5,=PADDLE_2_X1
 	LDRH R3 ,[R5]
+	;MOV R4, R3
 	LDR R6, =PADDLE_2_X2
 	LDRH R4, [R6]
+	;ADD R4, R5
 	BL Draw_Rectangle
 	
 	;DRAW THE BALL
+	;MOV R5,#Red
+	;LDRH R0, [R5]
 	MOV R0, #Red
 	LDR R5,=BALL_Y
 	LDRH R1, [R5]
 	MOV R2, R1
-	ADD R2, #10
+	ADD R2, #0x10 ;TODO: CHANGE THIS
 	LDR R5,=BALL_X
 	LDRH R3, [R5]
 	MOV R4, R3
-	ADD R4, #10
+	ADD R4, #0x10
 	BL Draw_Rectangle
 	
 	POP {R0-R12, PC}
@@ -588,11 +788,10 @@ PING_PONG_MODE
 ; THIS FUNCTION HANDELS MOVEMENT FOR PLAYERS
 ;***********************************
 PING_PONG_MOVE_PLAYERS
-	;STATE
-	; Read Key Inputs (Returns in R0 and R1: 0=none, R0 = 1=key1, R0 = 2=key2, R1 = 1=key3, R1 = 2=key4)
 	PUSH {R0-R12, LR}
-
+	; Read Key Inputs (Returns in R0 and R1: 0=none, R0 = 1=key5, R0 = 2=key6, R1 = 1=key7, R1 = 2=key8)
 	BL PING_PONG_READ_KEYS 
+	
 	MOV R7, R1			; STORE THE VALUE OF R1 BECAUSE R1 WILL BE USED IN DRAW_RECT 
 	
 	CMP R0, #1 			; CHECK IF PLAYER 1 IS MOVING DOWN
@@ -603,8 +802,9 @@ PING_PONG_MOVE_PLAYERS
 	CMP R1, #200
 	BCS END_MOVE_PLAYER_1
 						; ERASES PLAYER 1 AND REDRAWS PLAYER 1 DOWN 10 PIXELS
-	LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
-	LDRH R0, [R5]
+	;LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
+	;LDRH R0, [R5]
+	MOV R0, #Black
 	LDR R5,=PADDLE_1_X1
 	LDRH R1, [R5]
 	;MOV R2, R1
@@ -650,8 +850,9 @@ PLAYER_1_UP				; CHECK UP FOR PLAYER 1
 	CMP R1, #0
 	BLE END_MOVE_PLAYER_1
 						; ERASES PLAYER 1 AND REDRAWS PLAYER 1 UP 10 PIXELS
-	LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
-	LDRH R0, [R5]
+	;LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
+	;LDRH R0, [R5]
+	MOV R0, #Black
 	LDR R5,=PADDLE_1_X1
 	LDRH R1, [R5]
 	;MOV R2, R1
@@ -687,7 +888,7 @@ PLAYER_1_UP				; CHECK UP FOR PLAYER 1
 	BL Draw_Rectangle
 
 END_MOVE_PLAYER_1
-	
+	MOV R1, #0
 	MOV R1, R7
 	
 	CMP R1, #1 			; CHECK IF PLAYER 1 IS MOVING DOWN
@@ -699,8 +900,9 @@ END_MOVE_PLAYER_1
 	BCS END_MOVE_PLAYER_2
 	
 	; ERASES PLAYER 1 AND REDRAWS PLAYER 1 DOWN 10 PIXELS
-	LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
-	LDRH R0, [R5]
+	;LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
+	;LDRH R0, [R5]
+	MOV R0, #Black
 	LDR R5,=PADDLE_2_X1
 	LDRH R1, [R5]
 	LDR R6, =PADDLE_2_X2
@@ -743,8 +945,9 @@ PLAYER_2_UP				; CHECK UP FOR PLAYER 2
 	BLE END_MOVE_PLAYER_2
 	
 						; ERASES PLAYER 2 AND REDRAWS PLAYER 2 UP 10 PIXELS
-	LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
-	LDRH R0, [R5]
+	;LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
+	;LDRH R0, [R5]
+	MOV R0, #Black
 	LDR R5,=PADDLE_2_X1
 	LDRH R1, [R5]
 	LDR R6, =PADDLE_2_X2
@@ -778,11 +981,10 @@ PLAYER_2_UP				; CHECK UP FOR PLAYER 2
 END_MOVE_PLAYER_2	
 	
 	POP {R0-R12, PC}	
-
 ;****************************************
 ;THIS FUNCTION READS KEYS FOR PINGPONG GAME
-; R0 --> PLAYER 1, 0 NO KEY PRESSED, 1 WHEN KEY 1 IS PRESSED, 2 WHEN 2
-; R1 --> PLAYER 2, 0 NO KEY PRESSED, 1 WHEN KEY 3 IS PRESSED, 2 WHEN 4 
+; R0 --> PLAYER 1, 0 NO KEY PRESSED, 1 WHEN KEY 5 IS PRESSED, 2 WHEN 6
+; R1 --> PLAYER 2, 0 NO KEY PRESSED, 1 WHEN KEY 7 IS PRESSED, 2 WHEN 8 
 ;****************************************
 PING_PONG_READ_KEYS
     PUSH {R2, LR}              ; Save registers
@@ -791,18 +993,17 @@ PING_PONG_READ_KEYS
     LDR R2, [R1]               ; Read the value from GPIOB input data register
 
     ; Check each key pin (PB0-PB3)
-    TST R2, #(1 << 5)         ; Test key1 (PB0) bit
-    BEQ PING_PONG_CheckKey2              ; If key1 is not pressed, check key2
-    MOV R0, #1                 ; If key1 is pressed, return 1
+    TST R2, #(1 << 5)         ; Test key5 (PB0) bit
+    BEQ PING_PONG_CheckKey2              ; If key5 is not pressed, check key6
+    MOV R0, #1                 ; If key5 is pressed, return 1
     B PING_PONG_CheckKey3                ; Return
-
 ;***************************************************
 ; Read Key Inputs For Ping  Pong Game (Returns in R0 and R1: 0=none, R0 = 1=key1, R0 = 2=key2, R1 = 1=key3, R1 = 2=key4)
 ;***************************************************
 PING_PONG_CheckKey2
-    TST R2, #(1 << 6)        ; Test key2 (PB1) bit
-    BEQ NoKeyPressedForPlayer1 ; If key2 is not pressed, check key3
-    MOV R0, #2                 ; If key2 is pressed, return 2
+    TST R2, #(1 << 6)        ; Test key6 (PB1) bit
+    BEQ NoKeyPressedForPlayer1 ; If key6 is not pressed, check key7
+    MOV R0, #2                 ; If key6 is pressed, return 2
     B PING_PONG_CheckKey3                ; Return
 
 NoKeyPressedForPlayer1
@@ -811,15 +1012,15 @@ NoKeyPressedForPlayer1
     ;BX LR 
 
 PING_PONG_CheckKey3
-    TST R2, #(1 << 7)          ; Test key3 (PB2) bit
-    BEQ PING_PONG_CheckKey4              ; If key3 is not pressed, check key4
-    MOV R1, #1                  ; If key3 is pressed, return 3
+    TST R2, #(1 << 7)          ; Test key7 (PB2) bit
+    BEQ PING_PONG_CheckKey4              ; If key7 is not pressed, check key8
+    MOV R1, #1                  ; If key7 is pressed, return 1
     B END_PING_PONG_READ_KEYS   ; Return
 
 PING_PONG_CheckKey4
-    TST R2, #(1 << 8)          ; Test key4 (PB3) bit
-    BEQ NoKeyPressedForPlayer2           ; If key4 is not pressed, no key is pressed
-    MOV R1, #2                 ; If key4 is pressed, return 4
+    TST R2, #(1 << 8)          ; Test key8 (PB3) bit
+    BEQ NoKeyPressedForPlayer2           ; If key8 is not pressed, no key is pressed
+    MOV R1, #2                 ; If key4 is pressed, return 2
     B END_PING_PONG_READ_KEYS  ; Return
 
 NoKeyPressedForPlayer2
@@ -829,60 +1030,54 @@ END_PING_PONG_READ_KEYS
     BX LR                      ; Return
 ;************************************
 ;************************************
-
 BALL_CHECK_MOVE
-        PUSH {R0-R12, LR}
+        PUSH {R4-R9, LR}
 
         ; === Erase old ball ===
-        MOV R1, #Black
-
-	    LDR R5, =BALL_Y
-        LDRH R5, [R5]
-
-	    LDR R6, =BALL_X
-        LDRH R6, [R6]
-
+        ; Draw Square Center at (x=R5, y=R6 ,Color=R1)
+        ; el function f a5r el code 3ashan lw 7abb t3.adlha 
+        ; in another word till IBRAHIM BAKR TEST IT 
+	    LDR R1, =Black
+		;LDR R0, 
+        ;LDRH R1, [R0]
+		
+        LDR R0, =BALL_Y
+        LDRH R2, [R0]
+        LDR R0, =BALL_X
         BL TFT_DrawSquare
 
         ; === Update Ball Position ===
-        ; X_BALL += VELOCITY_X
-        LDR     R0, =BALL_X
-        LDRH    R1, [R0]
-        LDR     R2, =BALL_VELOCITY_X
-        LDRH    R3, [R2]
-        ADD     R1, R1, R3
-        STRH    R1, [R0]
+        LDR R0, =BALL_X
+        LDRH R1, [R0]
+        LDR R2, =BALL_VELOCITY_X
+        LDRH R3, [R2]
+        ADD R1, R1, R3
+        STRH R1, [R0]     ; X_BALL += X_VELOCITY
 
-        ; Y_BALL += VELOCITY_Y
-        LDR     R0, =BALL_Y
-        LDRH    R1, [R0]
-        LDR     R2, =BALL_VELOCITY_Y
-        LDRH    R3, [R2]
-        ADD     R1, R1, R3
-        STRH    R1, [R0]
-
+        LDR R0, =BALL_Y
+        LDRH R1, [R0]
+        LDR R2, =BALL_VELOCITY_Y
+        LDRH R3, [R2]
+        ADD R1, R1, R3
+        STRH R1, [R0]     ; Y_BALL += Y_VELOCITY
 
         ; === Draw updated ball ===
-        MOV R1, #Red
-
-	    LDR R5, =BALL_Y
-        LDRH R5, [R5]
-
-	    LDR R6, =BALL_X
-        LDRH R6, [R6]
-
+        ; Draw Square Center at (x=R5, y=R6 ,Color=R1)
+        ; el function f a5r el code 3ashan lw 7abb t3.adlha 
+        ; in another word till IBRAHIM BAKR TEST IT 
+	    MOV R0, #Red
+        LDRH R1, [R0]
+        LDR R0, =BALL_Y
+        LDRH R2, [R0]
+        LDR R0, =BALL_X
         BL TFT_DrawSquare
 
-
-
-
-
-
-        ; === Load BALL X into R4 and BALL Y into R5 ===
+         ; === Load BALL X into R4 and BALL Y into R5 ===
         LDR     R0, =BALL_X
         LDRH    R4, [R0]        ; R4 = X_BALL
         LDR     R0, =BALL_Y
         LDRH    R5, [R0]        ; R5 = Y_BALL
+
 
 CHECK_PADDLE_1
         ; === Load PADDLE 1 coordinates ===
@@ -895,7 +1090,7 @@ CHECK_PADDLE_1
         LDR     R0, =PADDLE_1_Y2
         LDRH    R9, [R0]        ; R9 = Y2
 
-	    ; === Paddle 1 Collision Check ===
+	; === Paddle 1 Collision Check ===
         MOV R10, #0
         CMP R4, R6
         ADDLT R10, R10, #1
@@ -926,7 +1121,7 @@ CHECK_PADDLE_2
         LDR     R0, =PADDLE_2_Y2
         LDRH    R9, [R0]        ; R9 = Y2
 
-	    ; === Paddle 2 Collision Check ===
+	; === Paddle 2 Collision Check ===
         MOV R10, #0
         CMP R4, R6
         ADDLT R10, R10, #1
@@ -984,18 +1179,15 @@ PLAYER_1_GOAL
 RESET_BALL
         ; Reset ball to center
         LDR R0, =BALL_Y
-        MOV R1, #120
+        MOV R1, #160
         STRH R1, [R0]
-
         LDR R0, =BALL_X
-        MOV R1, #180
         STRH R1, [R0]
 
-        POP {R0-R12, PC}
+        POP {R4-R9, PC}
 
 done
-        POP {R0-R12, PC}
-
+        POP {R4-R9, PC}
 ; *************************************************************
 ; draw_rectangle: Draw a rectangle between 4 lines (x1, x2) to (y1, y2) with the given color
 ; R0 = color ,R1 = Y1 ,R2 = Y2 ,R3 = X1 ,R4 = X2
@@ -1050,6 +1242,7 @@ Draw_Rectangle
     SUBS R8, R2, R1
     ADD R8, R8, #1    
     MUL R3, R8, R7
+    
 FillLoop_RECT
     ; Write high byte
     MOV R0, R10
