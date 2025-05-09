@@ -22,29 +22,6 @@
 ;   |      RS   =  PE12     |
 ;   |      CS   =  PE15     |
 ;   +-----------------------+
-
-
-;                          TFT Coordinate System (240x320)
-;
-;    Y-axis (up)240
-;  |                                                        Y1
-;  |                                                       |█|
-;  |                              ●                     X1 |█|  X2
-;  |       |█|                                             |█|
-;  |       |█|                                             |█|
-;  |       |█|                                             |█|
-;  |       |█|                                             Y2
-;  |       |█|
-;  |
-;  |  Player 1 Paddle                     Player 2 Paddle
-;  |
-;  |
-;  ;  --------------------------------------------------------------------------------->
-;                                                                           X-axis (right) 320
-;
-; 
-
-
         AREA    MyData, DATA, READWRITE
 
 PADDLE_WIDTH         SPACE    2
@@ -217,17 +194,6 @@ __main FUNCTION
 	;CLEAR THE SCREEN
 	MOV R0, #Black
 	BL TFT_FillScreen
-	BL delay
-	MOV R0, #Yellow
-	BL TFT_FillScreen
-	BL delay
-	MOV R0, #Green
-	MOV R1, #100
-	MOV R2, #200
-	MOV R3 ,#50
-	MOV R4, #200
-	BL Draw_Rectangle
-	BL delay
 	MOV R0, #0
 	MOV R1, #0
 	MOV R2, #0
@@ -837,8 +803,9 @@ PING_PONG_MOVE_PLAYERS
 	CMP R1, #200
 	BCS END_MOVE_PLAYER_1
 						; ERASES PLAYER 1 AND REDRAWS PLAYER 1 DOWN 10 PIXELS
-	LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
-	LDRH R0, [R5]
+	;LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
+	;LDRH R0, [R5]
+	MOV R0, #Black
 	LDR R5,=PADDLE_1_X1
 	LDRH R1, [R5]
 	;MOV R2, R1
@@ -884,8 +851,9 @@ PLAYER_1_UP				; CHECK UP FOR PLAYER 1
 	CMP R1, #0
 	BLE END_MOVE_PLAYER_1
 						; ERASES PLAYER 1 AND REDRAWS PLAYER 1 UP 10 PIXELS
-	LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
-	LDRH R0, [R5]
+	;LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
+	;LDRH R0, [R5]
+	MOV R0, #Black
 	LDR R5,=PADDLE_1_X1
 	LDRH R1, [R5]
 	;MOV R2, R1
@@ -933,8 +901,9 @@ END_MOVE_PLAYER_1
 	BCS END_MOVE_PLAYER_2
 	
 	; ERASES PLAYER 1 AND REDRAWS PLAYER 1 DOWN 10 PIXELS
-	LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
-	LDRH R0, [R5]
+	;LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
+	;LDRH R0, [R5]
+	MOV R0, #Black
 	LDR R5,=PADDLE_2_X1
 	LDRH R1, [R5]
 	LDR R6, =PADDLE_2_X2
@@ -977,8 +946,9 @@ PLAYER_2_UP				; CHECK UP FOR PLAYER 2
 	BLE END_MOVE_PLAYER_2
 	
 						; ERASES PLAYER 2 AND REDRAWS PLAYER 2 UP 10 PIXELS
-	LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
-	LDRH R0, [R5]
+	;LDR R5,=Black 		; TODO: CHANGE IF THE BACKGROUND ISN'T BLACK
+	;LDRH R0, [R5]
+	MOV R0, #Black
 	LDR R5,=PADDLE_2_X1
 	LDRH R1, [R5]
 	LDR R6, =PADDLE_2_X2
